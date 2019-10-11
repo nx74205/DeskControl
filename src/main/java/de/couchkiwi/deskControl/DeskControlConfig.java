@@ -1,4 +1,4 @@
-package de.couchkiwi.deskControl.database;
+package de.couchkiwi.deskControl;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.springframework.context.annotation.Bean;
