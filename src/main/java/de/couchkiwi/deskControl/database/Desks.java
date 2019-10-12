@@ -1,6 +1,7 @@
 package de.couchkiwi.deskControl.database;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 
 public class Desks {
     @Id
@@ -8,6 +9,7 @@ public class Desks {
 
     String deskNumber;
 
+    @Column(value = "OFFICE_SPACE_ID")
     int officeSpaceId;
 
     Long assignedUserId;
