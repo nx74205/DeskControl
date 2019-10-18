@@ -5,17 +5,15 @@ import de.couchkiwi.deskControl.database.Desks;
 import de.couchkiwi.deskControl.database.OfficeSpaces;
 import org.apache.commons.collections4.IteratorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/office")
@@ -59,7 +57,7 @@ public class OfficeSpaceRestController {
 
     }
 
-    @PostMapping(value = "/addnewdesk", produces = "application/json")
+    @PostMapping(value = "/add/desk")
     public ResponseEntity<String> addNewDesk (@RequestBody Desks desk) {
 
         Optional<OfficeSpaces> optional = deskControlRepository.findById((long) desk.getOfficeSpaceId());
@@ -69,6 +67,7 @@ public class OfficeSpaceRestController {
 
             if(deskControlRepository.countDesks(desk.getDeskNumber(), desk.getOfficeSpaceId()) == 0) {
                 officeSpace.getDesksSet().add(desk);
+
                 deskControlRepository.save(officeSpace);
 
                 return new ResponseEntity<>("Desk added!", HttpStatus.OK);
@@ -80,6 +79,46 @@ public class OfficeSpaceRestController {
             return new ResponseEntity<>("Office Not Found!", HttpStatus.EXPECTATION_FAILED);
         }
 
+    }
+
+    @PostMapping("/add/OfficeSpace")
+    public ResponseEntity<String> addNewOfficeSpace(@RequestParam("officename") String officeSpaceName) {
+
+        Optional optional = deskControlRepository.findByOfficeSpaceName(officeSpaceName);
+        if (optional.isPresent()) {
+            return new ResponseEntity<>("Office-Space already exists", HttpStatus.ALREADY_REPORTED);
+        } else {
+            OfficeSpaces officeSpace = new OfficeSpaces();
+            officeSpace.setOfficeSpaceName(officeSpaceName);
+            deskControlRepository.save(officeSpace);
+
+            return new ResponseEntity<>("Office-Space added", HttpStatus.OK);
+        }
+
+
+    }
+
+    @DeleteMapping("/delete/OfficeSpace")
+    public ResponseEntity<String> deleteOffice(@RequestParam("id") Long officeSpaceId) {
+        deskControlRepository.deleteById(officeSpaceId);
+
+        return new ResponseEntity<>("ID deleted or not existing", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/desk")
+    public ResponseEntity<String> deleteDesk(@RequestParam("officespaceid") Long officeSpaceId,
+                                             @RequestParam("desknumber") String deskNumber) {
+        Optional<OfficeSpaces> optional = deskControlRepository.findById(officeSpaceId);
+
+        if (optional.isPresent()) {
+            Set<Desks> desks = optional.get().getDesksSet();
+
+            desks.removeIf(desks1 -> desks1.getDeskNumber().equals(deskNumber));
+
+            deskControlRepository.save(optional.get());
+        }
+
+        return new ResponseEntity<>("ID deleted or not existing", HttpStatus.OK);
     }
 
 }
