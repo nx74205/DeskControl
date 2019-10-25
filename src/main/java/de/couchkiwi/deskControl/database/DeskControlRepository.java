@@ -19,4 +19,5 @@ public interface DeskControlRepository extends CrudRepository<OfficeSpaces, Long
             "where upper(office_space_name) = :name")
     Optional<Long> findByOfficeSpaceName (@Param("name") String name);
 
+
 }
